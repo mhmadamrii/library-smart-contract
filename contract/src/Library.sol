@@ -22,12 +22,17 @@ contract Library {
         _;
     }
 
+    modifier otherThanOwner() {
+        require(msg.sender != owner,"Owner cannot borrow his own book");
+        _;
+    }
+
     function addBook(string memory _title) public onlyOwner {
         bookCount++;
         books[bookCount] = Book(bookCount, _title, true);
     }
 
-    function borrowBook(uint _bookId) public {
+    function borrowBook(uint _bookId) public otherThanOwner() {
         require(_bookId > 0 && _bookId <= bookCount, "Book does not exit");
         Book storage book = books[_bookId];
         require(book.isAvailable, "Book is not available");
@@ -39,5 +44,14 @@ contract Library {
         Book storage book = books[_bookId];
         require(!book.isAvailable, "Book is already available");
         book.isAvailable = true;
+    }
+
+    function getAllBooks() public view returns (Book[] memory) {
+        Book[] memory allBooks = new Book[](bookCount);
+        for (uint i = 1; i <= bookCount; i++) {
+            allBooks[i - 1] = books[i];
+        }
+
+        return allBooks;
     }
 }
