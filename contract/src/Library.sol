@@ -13,6 +13,9 @@ contract Library {
     uint public bookCount;
     address public owner;
 
+    event BookAdded(uint indexed _id, string title, bool isAvailable);
+    event BookBorrowed(uint indexed _id, string title, address indexed borrower);
+
     constructor() {
         owner = msg.sender;
     }
@@ -30,6 +33,8 @@ contract Library {
     function addBook(string memory _title) public onlyOwner {
         bookCount++;
         books[bookCount] = Book(bookCount, _title, true);
+
+        emit BookAdded(bookCount, _title, true);
     }
 
     function borrowBook(uint _bookId) public otherThanOwner() {
@@ -37,6 +42,8 @@ contract Library {
         Book storage book = books[_bookId];
         require(book.isAvailable, "Book is not available");
         book.isAvailable = false;
+
+        emit BookBorrowed(_bookId, book.title, msg.sender);
     }
 
     function returnBook(uint _bookId) public {
